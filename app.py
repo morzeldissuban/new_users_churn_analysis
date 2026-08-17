@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -9,36 +8,42 @@ from datetime import datetime, timedelta
 # 1. Configuration & Styling
 # -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Gaming Analytics: D1 Retention Investigation",
+    page_title="Gaming Analytics: D1 Retention Incident",
     page_icon="🎮",
     layout="wide"
 )
 
-# Dark Theme CSS Customizations
 st.markdown("""
     <style>
     .stApp { background-color: #0E1117; color: #FFFFFF; }
     .metric-card {
         background-color: #1E222D;
-        padding: 15px;
+        padding: 18px;
         border-radius: 8px;
         border-left: 4px solid #74B9FF;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
     }
-    .metric-title { font-size: 0.8rem; color: #A0A0A0; }
-    .metric-value { font-size: 1.6rem; font-weight: bold; color: #FFFFFF; }
+    .metric-title { font-size: 0.85rem; color: #A0A0A0; margin-bottom: 5px; }
+    .metric-value { font-size: 1.8rem; font-weight: bold; color: #FFFFFF; }
     .insight-box {
         background-color: #1E222D;
         border-left: 4px solid #FDCB6E;
-        padding: 15px;
+        padding: 18px;
         border-radius: 6px;
+        margin-bottom: 25px;
+    }
+    .section-header {
+        color: #74B9FF;
+        border-bottom: 1px solid #2D3748;
+        padding-bottom: 8px;
+        margin-top: 35px;
         margin-bottom: 20px;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 2. Data Generation Function
+# 2. Data Generation
 # -----------------------------------------------------------------------------
 @st.cache_data
 def generate_data():
@@ -103,135 +108,171 @@ def generate_data():
 df_users, df_matches = generate_data()
 
 # -----------------------------------------------------------------------------
-# 3. Sidebar Filters & XP Interactive Slider
+# 3. Sidebar Filters
 # -----------------------------------------------------------------------------
 st.sidebar.image("https://img.icons8.com/color/96/controller.png", width=50)
-st.sidebar.title("Dashboard Controls")
+st.sidebar.title("Dashboard Filters")
 
 country_filter = st.sidebar.multiselect(
     "Filter Country", options=df_users["country"].unique(), default=df_users["country"].unique()
 )
 
-st.sidebar.markdown("---")
-st.sidebar.subheader("⚙️ Product Fix Simulation")
-xp_threshold = st.sidebar.slider(
-    "Set Minimum XP Unlock Level for Dragon's Hoard:",
-    min_value=1, max_value=15, value=1, step=1,
-    help="Move to Level 10 to simulate restricting early access to Dragon's Hoard."
-)
-
-show_fix_data = st.sidebar.checkbox("Show Post-Fix Recovery Data (May 25–31)", value=False)
-
-# Filter matches by country and date stage
-max_date = datetime(2026, 5, 31) if show_fix_data else datetime(2026, 5, 24)
-filtered_matches = df_matches[
-    (df_matches["country"].isin(country_filter)) &
-    (df_matches["install_date"] <= max_date)
-]
+filtered_matches = df_matches[df_matches["country"].isin(country_filter)]
 
 # -----------------------------------------------------------------------------
-# 4. Header & Insights Box
+# 4. Header & Executive Summary
 # -----------------------------------------------------------------------------
-st.title("🎮 Product Analytics: D1 Retention Incident Investigation")
-st.markdown("Root Cause Analysis on **May 21st D1 Retention Drop** & XP Level Balancing Solution.")
+st.title("🎮 Product Analytics: D1 Retention Incident & Root Cause Analysis")
+st.markdown("Investigation of **May 21st D1 Retention Drop**, Post-Fix Validation & XP Level Balancing.")
 
-if xp_threshold < 10:
-    st.markdown(f"""
-    <div class="insight-box">
-        <b>🔍 Investigation Findings (Current XP Unlock Level: {xp_threshold}):</b><br>
-        • <b>Anomaly Detected:</b> D1 Retention dropped by <b>~5%</b> starting May 21st.<br>
-        • <b>Root Cause:</b> <i>Dragon's Hoard</i> tournament (250 coins fee, 32% win rate) was accessible to low-XP players (Levels 1–9), triggering early balance depletion.<br>
-        • <b>Action Required:</b> Move the XP Unlock Level slider to <b>Level 10</b> in the sidebar to simulate the fix.
-    </div>
-    """, unsafe_allow_html=True)
-else:
-    st.markdown(f"""
-    <div class="insight-box" style="border-left-color: #55E6C1;">
-        <b>✅ Simulation Result (Dragon's Hoard Unlocked at XP Level {xp_threshold}+):</b><br>
-        • <b>Issue Resolved:</b> Low-XP players (1–9) are protected from balance depletion.<br>
-        • <b>Retention Impact:</b> D1 Retention fully recovers to <b>~58.5%</b>.<br>
-        • <b>Tournament Viability:</b> High-XP players (10+) engage successfully with an optimal ~18% churn rate.
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("""
+<div class="insight-box">
+    <b>🔍 Executive Incident Summary:</b><br>
+    • <b>Incident Period:</b> On May 21st, D1 Retention dropped by <b>~5%</b> (from 58.2% to 53.2%).<br>
+    • <b>Root Cause:</b> Early exposure to the high-stakes <i>Dragon's Hoard</i> tournament (250 coins entry fee, 32% win rate) depleted coin balances for early-stage players.<br>
+    • <b>Action & Recovery:</b> On May 25th, early access was rebalanced. D1 Retention immediately recovered to baseline (58.5%).
+</div>
+""", unsafe_allow_html=True)
 
-# -----------------------------------------------------------------------------
-# 5. Metrics Row
-# -----------------------------------------------------------------------------
+# Metric Row
 m1, m2, m3, m4 = st.columns(4)
 with m1:
-    st.markdown(f'<div class="metric-card"><div class="metric-title">TOTAL ANALYZED USERS</div><div class="metric-value">{filtered_matches["user_id"].nunique():,}</div></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="metric-card"><div class="metric-title">TOTAL USERS ANALYZED</div><div class="metric-value">{filtered_matches["user_id"].nunique():,}</div></div>', unsafe_allow_html=True)
 with m2:
-    ret_val = "53.2%" if xp_threshold < 10 and not show_fix_data else "58.4%"
-    st.markdown(f'<div class="metric-card"><div class="metric-title">CURRENT D1 RETENTION</div><div class="metric-value">{ret_val}</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><div class="metric-title">INCIDENT D1 RETENTION</div><div class="metric-value" style="color: #FF7675;">53.2%</div></div>', unsafe_allow_html=True)
 with m3:
-    st.markdown(f'<div class="metric-card"><div class="metric-title">DRAGON\'S HOARD ENTRY FEE</div><div class="metric-value">250 Coins</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><div class="metric-title">POST-FIX D1 RETENTION</div><div class="metric-value" style="color: #55E6C1;">58.5%</div></div>', unsafe_allow_html=True)
 with m4:
-    st.markdown(f'<div class="metric-card"><div class="metric-title">OPTIMAL UNLOCK LEVEL</div><div class="metric-value">XP Level 10+</div></div>', unsafe_allow_html=True)
-
-st.markdown("---")
+    st.markdown('<div class="metric-card"><div class="metric-title">DRAGON\'S HOARD ENTRY FEE</div><div class="metric-value">250 Coins</div></div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 6. Charts Layout
+# PART 1: INCIDENT INVESTIGATION (MAY 1 – MAY 24)
 # -----------------------------------------------------------------------------
-c1, c2 = st.columns(2)
+st.markdown("<h3 class='section-header'>PART 1: Incident Investigation (May 1–24)</h3>", unsafe_allow_html=True)
 
-with c1:
-    st.subheader("1. Daily D1 Retention Trend")
-    daily_ret = filtered_matches.groupby("install_date").agg(total_users=("user_id", "nunique")).reset_index()
-    
-    def calc_d1(dt):
-        if datetime(2026, 5, 21) <= dt < datetime(2026, 5, 25):
-            return np.random.uniform(52.2, 53.8) if xp_threshold < 10 else np.random.uniform(57.8, 59.2)
-        else:
-            return np.random.uniform(57.0, 58.9)
+matches_inv = filtered_matches[filtered_matches["install_date"] <= datetime(2026, 5, 24)]
 
-    daily_ret["d1_retention"] = daily_ret["install_date"].apply(calc_d1)
-    daily_ret["label"] = daily_ret["d1_retention"].apply(lambda x: f"{x:.1f}%")
+# Graph 1: Investigation Retention
+st.subheader("1. Daily D1 Retention Trend (Ongoing Drop Detected May 21)")
+daily_ret_inv = matches_inv.groupby("install_date").agg(total_users=("user_id", "nunique")).reset_index()
 
-    fig1 = px.line(daily_ret, x="install_date", y="d1_retention", text="label", markers=True, template="plotly_dark")
-    fig1.update_traces(line_color="#74B9FF" if xp_threshold < 10 else "#55E6C1", line_width=2.5, textposition="top center")
-    fig1.update_yaxes(range=[0, 85])
-    st.plotly_chart(fig1, use_container_width=True)
+def calc_d1_inv(dt):
+    if dt >= datetime(2026, 5, 21):
+        return np.random.uniform(52.2, 53.8)
+    else:
+        return np.random.uniform(57.1, 58.9)
 
-with c2:
-    st.subheader("2. D1 Game Mode Distribution")
-    d1_m = filtered_matches[filtered_matches["session_number"] <= 3]
-    d1_s = d1_m.groupby(["install_date", "tournament_type"])["match_id"].count().reset_index()
-    d1_tot = d1_s.groupby("install_date")["match_id"].transform("sum")
-    d1_s["share_pct"] = (d1_s["match_id"] / d1_tot) * 100
+daily_ret_inv["d1_retention"] = daily_ret_inv["install_date"].apply(calc_d1_inv)
+daily_ret_inv["label"] = daily_ret_inv["d1_retention"].apply(lambda x: f"{x:.1f}%")
 
-    fig2 = px.area(d1_s, x="install_date", y="share_pct", color="tournament_type", template="plotly_dark")
-    st.plotly_chart(fig2, use_container_width=True)
+fig1 = px.line(daily_ret_inv, x="install_date", y="d1_retention", text="label", markers=True, template="plotly_dark")
+fig1.update_traces(line_color="#74B9FF", line_width=2.5, textposition="top center")
+fig1.update_yaxes(range=[0, 80])
+st.plotly_chart(fig1, use_container_width=True)
 
-c3, c4 = st.columns(2)
+# Graph 2: Game Mode Distribution
+st.subheader("2. Daily D1 Game Mode Distribution (Dragon's Hoard Appears May 21)")
+d1_m_inv = matches_inv[matches_inv["session_number"] <= 3]
+d1_s_inv = d1_m_inv.groupby(["install_date", "tournament_type"])["match_id"].count().reset_index()
+d1_tot_inv = d1_s_inv.groupby("install_date")["match_id"].transform("sum")
+d1_s_inv["share_pct"] = (d1_s_inv["match_id"] / d1_tot_inv) * 100
 
-with c3:
-    st.subheader("3. Tournament Economy (Fee vs Win Rate)")
-    econ = filtered_matches.groupby("tournament_type").agg(
-        fee=("entry_fee", "mean"), win_rate=("is_win", lambda x: x.mean() * 100), count=("match_id", "count")
-    ).reset_index()
-    econ["label"] = econ.apply(lambda r: f"{r['tournament_type']}<br>({r['fee']:.0f} Coins)", axis=1)
+fig2 = px.area(d1_s_inv, x="install_date", y="share_pct", color="tournament_type", template="plotly_dark")
+st.plotly_chart(fig2, use_container_width=True)
 
-    fig3 = px.scatter(econ, x="fee", y="win_rate", size="count", color="tournament_type", text="label", template="plotly_dark")
-    fig3.update_traces(textposition="top center")
-    fig3.update_xaxes(range=[0, 310])
-    st.plotly_chart(fig3, use_container_width=True)
+# Graph 3: Tournament Economy
+st.subheader("3. Tournament Economy Breakdown (Entry Fee vs Win Rate Anomaly)")
+econ = matches_inv.groupby("tournament_type").agg(
+    fee=("entry_fee", "mean"), win_rate=("is_win", lambda x: x.mean() * 100), count=("match_id", "count")
+).reset_index()
+econ["label"] = econ.apply(lambda r: f"{r['tournament_type']}<br>({r['fee']:.0f} Coins, {r['win_rate']:.1f}%)", axis=1)
 
-with c4:
-    st.subheader("4. XP Threshold: Churn Rate in Dragon's Hoard")
-    xp_imp = filtered_matches[filtered_matches["tournament_type"] == "Dragon's Hoard"].groupby("xp_level").agg(
-        churn=("is_win", lambda x: (1 - x.mean()) * 100)
-    ).reset_index()
-    
-    # Highlight safe vs unsafe levels based on slider
-    xp_imp["status"] = xp_imp["xp_level"].apply(lambda x: "Safe (Unlocked)" if x >= xp_threshold else "Blocked / High Churn")
-    xp_imp["label"] = xp_imp["churn"].apply(lambda x: f"{x:.1f}%")
+fig3 = px.scatter(econ, x="fee", y="win_rate", size="count", color="tournament_type", text="label", template="plotly_dark")
+fig3.update_traces(textposition="top center")
+fig3.update_xaxes(range=[0, 310])
+st.plotly_chart(fig3, use_container_width=True)
 
-    fig5 = px.bar(
-        xp_imp, x="xp_level", y="churn", text="label", color="status",
-        color_discrete_map={"Blocked / High Churn": "#FF7675", "Safe (Unlocked)": "#55E6C1"},
-        template="plotly_dark"
-    )
-    fig5.add_hline(y=20, line_dash="dash", line_color="#55E6C1", annotation_text="Safe Churn Baseline (~18%)")
-    fig5.update_xaxes(dtick=1)
-    st.plotly_chart(fig5, use_container_width=True)
+# -----------------------------------------------------------------------------
+# PART 2: POST-FIX VALIDATION & RECOVERY (MAY 25 – MAY 31)
+# -----------------------------------------------------------------------------
+st.markdown("<h3 class='section-header'>PART 2: Post-Fix Validation & Retention Recovery</h3>", unsafe_allow_html=True)
+
+# Graph 4: Full Retention View with Fix
+st.subheader("4. Full D1 Retention View (Post-Fix Deployment on May 25)")
+daily_ret_full = filtered_matches.groupby("install_date").agg(total_users=("user_id", "nunique")).reset_index()
+
+def calc_d1_full(dt):
+    if datetime(2026, 5, 21) <= dt < datetime(2026, 5, 25):
+        return np.random.uniform(52.2, 53.8)
+    elif dt >= datetime(2026, 5, 25):
+        return np.random.uniform(57.8, 59.5)
+    else:
+        return np.random.uniform(57.1, 58.9)
+
+daily_ret_full["d1_retention"] = daily_ret_full["install_date"].apply(calc_d1_full)
+daily_ret_full["label"] = daily_ret_full["d1_retention"].apply(lambda x: f"{x:.1f}%")
+
+fig4 = px.line(daily_ret_full, x="install_date", y="d1_retention", text="label", markers=True, template="plotly_dark")
+fig4.update_traces(line_color="#55E6C1", line_width=2.5, textposition="top center")
+fig4.add_vline(
+    x=pd.Timestamp("2026-05-25").timestamp() * 1000, 
+    line_dash="dash", line_color="#FF7675",
+    annotation_text="Fix Deployed (May 25)", annotation_position="top left"
+)
+fig4.update_yaxes(range=[0, 80])
+st.plotly_chart(fig4, use_container_width=True)
+
+# -----------------------------------------------------------------------------
+# PART 3: XP LEVEL THRESHOLD SIMULATION
+# -----------------------------------------------------------------------------
+st.markdown("<h3 class='section-header'>PART 3: Interactive XP Level Unlock Simulation</h3>", unsafe_allow_html=True)
+st.markdown("Use the slider below to simulate setting the **Minimum XP Unlock Level** for *Dragon's Hoard* and observe the dynamic impact on Retention and Churn.")
+
+# Dedicated Interactive Slider
+xp_threshold = st.slider(
+    "Set Minimum XP Unlock Level for Dragon's Hoard:",
+    min_value=1, max_value=15, value=1, step=1,
+    help="Move slider to Level 10 to see full recovery."
+)
+
+if xp_threshold < 10:
+    st.info(f"⚠️ **Current Simulation (XP Level {xp_threshold}):** Low-XP players (1–9) are exposed to early coin depletion, causing a ~5% D1 Retention drop.")
+else:
+    st.success(f"✅ **Optimal Threshold Reached (XP Level {xp_threshold}+):** Dragon's Hoard is locked for early players. D1 Retention recovers completely!")
+
+# Graph 5: Dynamic Simulated Retention Graph
+st.subheader("5. Simulated D1 Retention Impact (Controlled by XP Slider)")
+daily_ret_sim = filtered_matches.groupby("install_date").agg(total_users=("user_id", "nunique")).reset_index()
+
+def calc_d1_sim(dt):
+    if datetime(2026, 5, 21) <= dt < datetime(2026, 5, 25):
+        return np.random.uniform(52.2, 53.8) if xp_threshold < 10 else np.random.uniform(57.8, 59.2)
+    else:
+        return np.random.uniform(57.1, 58.9)
+
+daily_ret_sim["d1_retention"] = daily_ret_sim["install_date"].apply(calc_d1_sim)
+daily_ret_sim["label"] = daily_ret_sim["d1_retention"].apply(lambda x: f"{x:.1f}%")
+
+fig5 = px.line(daily_ret_sim, x="install_date", y="d1_retention", text="label", markers=True, template="plotly_dark")
+fig5.update_traces(line_color="#74B9FF" if xp_threshold < 10 else "#55E6C1", line_width=2.5, textposition="top center")
+fig5.update_yaxes(range=[0, 80])
+st.plotly_chart(fig5, use_container_width=True)
+
+# Graph 6: Dynamic Churn Rate by XP Level
+st.subheader("6. Churn Rate in Dragon's Hoard by Player XP Level")
+xp_imp = filtered_matches[filtered_matches["tournament_type"] == "Dragon's Hoard"].groupby("xp_level").agg(
+    churn=("is_win", lambda x: (1 - x.mean()) * 100)
+).reset_index()
+
+xp_imp["status"] = xp_imp["xp_level"].apply(lambda x: "Safe / Unlocked" if x >= xp_threshold else "Blocked / High Churn")
+xp_imp["label"] = xp_imp["churn"].apply(lambda x: f"{x:.1f}%")
+
+fig6 = px.bar(
+    xp_imp, x="xp_level", y="churn", text="label", color="status",
+    color_discrete_map={"Blocked / High Churn": "#FF7675", "Safe / Unlocked": "#55E6C1"},
+    template="plotly_dark",
+    labels={"xp_level": "Player XP Level", "churn": "Churn Rate (%)"}
+)
+fig6.add_hline(y=20, line_dash="dash", line_color="#55E6C1", annotation_text="Safe Churn Baseline (~18%)")
+fig6.update_xaxes(dtick=1)
+st.plotly_chart(fig6, use_container_width=True)
