@@ -178,7 +178,7 @@ fig1.update_traces(
     line_color="#74B9FF", 
     line_width=2.5, 
     textposition="top center",
-    textfont=dict(color="#FFFFFF", size=12)
+    textfont=dict(color="#000000", size=12, family="Arial Black") # BLACK FONT FOR LABELS
 )
 fig1.update_yaxes(range=[0, 80])
 fig1.update_layout(font=dict(color="#FFFFFF"))
@@ -213,7 +213,7 @@ econ["label"] = econ.apply(lambda r: f"{r['tournament_type']}<br>({r['fee']:.0f}
 fig3 = px.scatter(econ, x="fee", y="win_rate", size="count", color="tournament_type", text="label", template="plotly_dark")
 fig3.update_traces(
     textposition="top center",
-    textfont=dict(color="#FFFFFF", size=11)
+    textfont=dict(color="#000000", size=11, family="Arial Black") # BLACK FONT FOR LABELS
 )
 fig3.update_xaxes(range=[0, 310])
 fig3.update_layout(font=dict(color="#FFFFFF"))
@@ -243,7 +243,7 @@ fig4.update_traces(
     line_color="#55E6C1", 
     line_width=2.5, 
     textposition="top center",
-    textfont=dict(color="#FFFFFF", size=12)
+    textfont=dict(color="#000000", size=12, family="Arial Black") # BLACK FONT FOR LABELS
 )
 fig4.add_vline(
     x=pd.Timestamp("2026-05-25").timestamp() * 1000, 
@@ -298,7 +298,7 @@ fig5 = px.line(daily_ret_sim, x="install_date", y="d1_retention", text="label", 
 fig5.update_traces(
     line_color="#55E6C1" if xp_threshold >= 10 else ("#FDCB6E" if xp_threshold >= 5 else "#FF7675"),
     line_width=2.5, textposition="top center",
-    textfont=dict(color="#FFFFFF", size=12)
+    textfont=dict(color="#000000", size=12, family="Arial Black") # BLACK FONT FOR LABELS
 )
 fig5.update_yaxes(range=[0, 80])
 fig5.update_layout(font=dict(color="#FFFFFF"))
@@ -326,7 +326,7 @@ fig6 = px.bar(
 )
 fig6.update_traces(
     textposition="outside",
-    textfont=dict(color="#FFFFFF", size=11)
+    textfont=dict(color="#000000", size=11, family="Arial Black") # BLACK FONT FOR LABELS
 )
 fig6.add_hline(
     y=20, line_dash="dash", line_color="#55E6C1", 
