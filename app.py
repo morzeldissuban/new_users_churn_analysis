@@ -174,7 +174,12 @@ daily_ret_inv["d1_retention"] = daily_ret_inv["install_date"].apply(calc_d1_inv)
 daily_ret_inv["label"] = daily_ret_inv["d1_retention"].apply(lambda x: f"{x:.1f}%")
 
 fig1 = px.line(daily_ret_inv, x="install_date", y="d1_retention", text="label", markers=True, template="plotly_dark")
-fig1.update_traces(line_color="#74B9FF", line_width=2.5, textposition="top center")
+fig1.update_traces(
+    line_color="#74B9FF", 
+    line_width=2.5, 
+    textposition="top center",
+    textfont=dict(color="#FFFFFF", size=12)
+)
 fig1.update_yaxes(range=[0, 80])
 fig1.update_layout(font=dict(color="#FFFFFF"))
 st.plotly_chart(fig1, use_container_width=True)
@@ -206,7 +211,10 @@ econ = matches_inv.groupby("tournament_type").agg(
 econ["label"] = econ.apply(lambda r: f"{r['tournament_type']}<br>({r['fee']:.0f} Coins, {r['win_rate']:.1f}%)", axis=1)
 
 fig3 = px.scatter(econ, x="fee", y="win_rate", size="count", color="tournament_type", text="label", template="plotly_dark")
-fig3.update_traces(textposition="top center")
+fig3.update_traces(
+    textposition="top center",
+    textfont=dict(color="#FFFFFF", size=11)
+)
 fig3.update_xaxes(range=[0, 310])
 fig3.update_layout(font=dict(color="#FFFFFF"))
 st.plotly_chart(fig3, use_container_width=True)
@@ -231,11 +239,17 @@ daily_ret_full["d1_retention"] = daily_ret_full["install_date"].apply(calc_d1_fu
 daily_ret_full["label"] = daily_ret_full["d1_retention"].apply(lambda x: f"{x:.1f}%")
 
 fig4 = px.line(daily_ret_full, x="install_date", y="d1_retention", text="label", markers=True, template="plotly_dark")
-fig4.update_traces(line_color="#55E6C1", line_width=2.5, textposition="top center")
+fig4.update_traces(
+    line_color="#55E6C1", 
+    line_width=2.5, 
+    textposition="top center",
+    textfont=dict(color="#FFFFFF", size=12)
+)
 fig4.add_vline(
     x=pd.Timestamp("2026-05-25").timestamp() * 1000, 
     line_dash="dash", line_color="#FF7675",
-    annotation_text="Fix Deployed (May 25)", annotation_position="top left"
+    annotation_text="Fix Deployed (May 25)", annotation_position="top left",
+    annotation_font=dict(color="#FF7675", size=13)
 )
 fig4.update_yaxes(range=[0, 80])
 fig4.update_layout(font=dict(color="#FFFFFF"))
@@ -253,9 +267,7 @@ xp_threshold = st.slider(
     min_value=1, max_value=15, value=1, step=1
 )
 
-# Smooth Gradual Retention Curve Logic
-# Retention gradually recovers as XP Threshold increases from 1 to 10
-retention_gain = min(1.0, (xp_threshold - 1) / 9.0) # 0.0 at Level 1, 1.0 at Level 10+
+retention_gain = min(1.0, (xp_threshold - 1) / 9.0)
 simulated_retention_val = 53.2 + (5.3 * retention_gain)
 
 if xp_threshold < 5:
@@ -285,7 +297,8 @@ daily_ret_sim["label"] = daily_ret_sim["d1_retention"].apply(lambda x: f"{x:.1f}
 fig5 = px.line(daily_ret_sim, x="install_date", y="d1_retention", text="label", markers=True, template="plotly_dark")
 fig5.update_traces(
     line_color="#55E6C1" if xp_threshold >= 10 else ("#FDCB6E" if xp_threshold >= 5 else "#FF7675"),
-    line_width=2.5, textposition="top center"
+    line_width=2.5, textposition="top center",
+    textfont=dict(color="#FFFFFF", size=12)
 )
 fig5.update_yaxes(range=[0, 80])
 fig5.update_layout(font=dict(color="#FFFFFF"))
@@ -294,9 +307,7 @@ st.plotly_chart(fig5, use_container_width=True)
 # Graph 6: Smooth Gradual Churn Rate per XP Level
 st.subheader("6. Dragon's Hoard Churn Rate by Player XP Level")
 
-# Realistic Gradual Churn Decay Across Levels 1 to 15
 xp_levels = list(range(1, 16))
-# Churn drops smoothly from ~58% at XP 1 down to ~18% at XP 10+
 gradual_churns = [max(18.0, 58.0 - (i - 1) * 4.4) for i in xp_levels]
 
 xp_df = pd.DataFrame({
@@ -313,7 +324,15 @@ fig6 = px.bar(
     template="plotly_dark",
     labels={"xp_level": "Player XP Level", "churn": "Churn Rate (%)"}
 )
-fig6.add_hline(y=20, line_dash="dash", line_color="#55E6C1", annotation_text="Safe Churn Baseline (~18-20%)")
+fig6.update_traces(
+    textposition="outside",
+    textfont=dict(color="#FFFFFF", size=11)
+)
+fig6.add_hline(
+    y=20, line_dash="dash", line_color="#55E6C1", 
+    annotation_text="Safe Churn Baseline (~18-20%)",
+    annotation_font=dict(color="#55E6C1", size=12)
+)
 fig6.update_xaxes(dtick=1)
 fig6.update_layout(font=dict(color="#FFFFFF"))
 st.plotly_chart(fig6, use_container_width=True)
