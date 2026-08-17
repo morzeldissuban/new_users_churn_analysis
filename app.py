@@ -17,6 +17,20 @@ st.markdown("""
     <style>
     .stApp { background-color: #0E1117; color: #FFFFFF; }
     
+    /* Author Badge & Disclaimer Styling */
+    .author-badge {
+        background-color: #161B22;
+        border: 1px solid #30363D;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .author-text { color: #55E6C1; font-weight: bold; font-size: 0.95rem; }
+    .disclaimer-text { color: #8B949E; font-size: 0.85rem; font-style: italic; }
+
     /* Metrics Styling */
     .metric-card {
         background-color: #1E222D;
@@ -59,7 +73,17 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 2. Data Generation Function
+# 2. Top Author Badge & Synthetic Data Disclaimer
+# -----------------------------------------------------------------------------
+st.markdown("""
+<div class="author-badge">
+    <span class="author-text">👤 Created by <b>Mor Suban Zeldis</b> | Product Analyst Portfolio</span>
+    <span class="disclaimer-text">🔒 Note: All data in this dashboard is 100% synthetic and generated for demonstration purposes.</span>
+</div>
+""", unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# 3. Data Generation Function
 # -----------------------------------------------------------------------------
 @st.cache_data
 def generate_data():
@@ -114,7 +138,7 @@ def generate_data():
 df_users, df_matches = generate_data()
 
 # -----------------------------------------------------------------------------
-# 3. Sidebar Filters
+# 4. Sidebar Filters
 # -----------------------------------------------------------------------------
 st.sidebar.image("https://img.icons8.com/color/96/controller.png", width=50)
 st.sidebar.title("Dashboard Filters")
@@ -126,7 +150,7 @@ country_filter = st.sidebar.multiselect(
 filtered_matches = df_matches[df_matches["country"].isin(country_filter)]
 
 # -----------------------------------------------------------------------------
-# 4. Header & Executive Summary
+# 5. Header & Executive Summary
 # -----------------------------------------------------------------------------
 st.title("🎮 Product Analytics: D1 Retention Incident & Root Cause Analysis")
 st.markdown("Investigation of **May 21st D1 Retention Drop**, Post-Fix Validation & XP Level Balancing.")
@@ -178,7 +202,7 @@ fig1.update_traces(
     line_color="#74B9FF", 
     line_width=2.5, 
     textposition="top center",
-    textfont=dict(color="#000000", size=12, family="Arial Black") # BLACK FONT FOR LABELS
+    textfont=dict(color="#000000", size=12, family="Arial Black")
 )
 fig1.update_yaxes(range=[0, 80])
 fig1.update_layout(font=dict(color="#FFFFFF"))
@@ -213,7 +237,7 @@ econ["label"] = econ.apply(lambda r: f"{r['tournament_type']}<br>({r['fee']:.0f}
 fig3 = px.scatter(econ, x="fee", y="win_rate", size="count", color="tournament_type", text="label", template="plotly_dark")
 fig3.update_traces(
     textposition="top center",
-    textfont=dict(color="#000000", size=11, family="Arial Black") # BLACK FONT FOR LABELS
+    textfont=dict(color="#000000", size=11, family="Arial Black")
 )
 fig3.update_xaxes(range=[0, 310])
 fig3.update_layout(font=dict(color="#FFFFFF"))
@@ -243,7 +267,7 @@ fig4.update_traces(
     line_color="#55E6C1", 
     line_width=2.5, 
     textposition="top center",
-    textfont=dict(color="#000000", size=12, family="Arial Black") # BLACK FONT FOR LABELS
+    textfont=dict(color="#000000", size=12, family="Arial Black")
 )
 fig4.add_vline(
     x=pd.Timestamp("2026-05-25").timestamp() * 1000, 
@@ -298,7 +322,7 @@ fig5 = px.line(daily_ret_sim, x="install_date", y="d1_retention", text="label", 
 fig5.update_traces(
     line_color="#55E6C1" if xp_threshold >= 10 else ("#FDCB6E" if xp_threshold >= 5 else "#FF7675"),
     line_width=2.5, textposition="top center",
-    textfont=dict(color="#000000", size=12, family="Arial Black") # BLACK FONT FOR LABELS
+    textfont=dict(color="#000000", size=12, family="Arial Black")
 )
 fig5.update_yaxes(range=[0, 80])
 fig5.update_layout(font=dict(color="#FFFFFF"))
@@ -326,7 +350,7 @@ fig6 = px.bar(
 )
 fig6.update_traces(
     textposition="outside",
-    textfont=dict(color="#000000", size=11, family="Arial Black") # BLACK FONT FOR LABELS
+    textfont=dict(color="#000000", size=11, family="Arial Black")
 )
 fig6.add_hline(
     y=20, line_dash="dash", line_color="#55E6C1", 
@@ -336,3 +360,9 @@ fig6.add_hline(
 fig6.update_xaxes(dtick=1)
 fig6.update_layout(font=dict(color="#FFFFFF"))
 st.plotly_chart(fig6, use_container_width=True)
+
+# -----------------------------------------------------------------------------
+# 6. Footer Disclaimer
+# -----------------------------------------------------------------------------
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: #8B949E; font-size: 0.85rem;'>Dashboard designed & developed by <b>Mor Suban</b> • Portfolio Demonstration • Synthetic Gaming Analytics Dataset</p>", unsafe_allow_html=True)
